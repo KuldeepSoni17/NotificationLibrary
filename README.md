@@ -9,4 +9,3 @@ include this in manifest:-
 android:name=".NotiService"
 android:enabled="true"
 android:exported="true">
-</service>
