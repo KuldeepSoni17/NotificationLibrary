@@ -22,25 +22,24 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class NotiService extends Service {
-
     private boolean isServiceRunning;
-
     private CountDownTimer countDownTimer;
-
     public NotiService() {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(R.integer.startNotification);
+        //REQUEST SERVER EVERY 60000ms ~ 60s for any change
         countDownTimer = new CountDownTimer(60000, 1000) {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d("TICK","OnTICK");
+                Log.d("TICK",millisUntilFinished + "");
             }
             @Override
             public void onFinish() {
+                //Call the server for change in database.
                 checkChange();
             }
         };
@@ -65,11 +64,12 @@ public class NotiService extends Service {
                     Intent.FLAG_ACTIVITY_SINGLE_TOP);
             i.putExtra("FEASIBLE",true);
             PendingIntent pi= PendingIntent.getActivity(this, 0, i, 0);
-            Notification notification = new Notification.Builder(getApplicationContext()).setContentIntent(pi).setContentTitle("BEMRR").setContentText("FOREGROUND_SERVICE_NOTI").setSmallIcon(R.mipmap.ic_launcher).setOngoing(false).build();
+            Notification notification = new Notification.Builder(getApplicationContext()).setContentIntent(pi).setContentTitle("TITLE").setContentText("NOTI_BODY").setSmallIcon(R.mipmap.ic_launcher).setOngoing(false).build();
             notification.flags |= Notification.FLAG_AUTO_CANCEL;
             notification.defaults |= Notification.DEFAULT_ALL;
             startForeground(getResources().getInteger(R.integer.periodicNotification), notification);
-         periodicCaller();
+            //CALLS THE TIMER PERIODICALLY WHICH ONFINSH WILL CALL checkChange().
+            periodicCaller();
         }
     }
 
@@ -77,7 +77,7 @@ public class NotiService extends Service {
     {
         countDownTimer.start();
     }
-
+    //NOTIFICATION BUILD HELPER
     public void buildNotification(int logoid, String title, String text)
     {
         NotificationManager myNotificationManager;
@@ -87,13 +87,15 @@ public class NotiService extends Service {
         notification.defaults = notification.DEFAULT_ALL;
         myNotificationManager.notify(getResources().getInteger(R.integer.periodicNotification),notification);
     }
-
+    
     private void checkChange()
     {
         Log.d("checkChange","HERE");
-        String path = "http://videocall.primasolusoft.com/bemrrtest.php";
+        String path = "xyz.php"; // YOUR URL WHICH WILL RETURN THE DATA CHANGE 
         Uri.Builder builder = new Uri.Builder();
         new DBthread().execute(path,builder.build().getEncodedQuery());
+        //AFTER CHECKING CHANGE AGAIN START THE TIMER. SOME MAY DOUBT THAT IT WILL START THREAD EVERY TIME AND THEREBY WILL INCREASE THE LOAD BUT IF MANY THREADS WILL START ALTOGETHER GC WILL FINISH THEM. SO DO NOT WORRY ABOUT PERFORMANCE.
+        
         periodicCaller();
     }
     private void stop_service()
@@ -103,6 +105,8 @@ public class NotiService extends Service {
             stopForeground(true);
         }
     }
+    
+    //ASYNC CLASS FOR CALLING URL AND PROCESSING RETURNED DATA-STRING IN OnPostExecute()
     private class DBthread extends AsyncTask<String,String,String>
     {
         HttpURLConnection conn;
@@ -162,9 +166,9 @@ public class NotiService extends Service {
         protected void onPostExecute(String s) {
             Log.d("DATABASE",s);
             super.onPostExecute(s);
-            if(s.contains("BEMRR_TEST_SUCCESS"))
+            if(s.contains("TEST_SUCCESS"))
             {
-                buildNotification(R.mipmap.ic_launcher,"Bemrr",s);
+                buildNotification(R.mipmap.ic_launcher,"TITLE",s);
             }
         }
 
