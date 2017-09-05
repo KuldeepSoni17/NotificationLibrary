@@ -4,8 +4,8 @@ This library is for receiving notification data without setting up FCM and Node.
 
 Disadvantage of this Library :- It generates a persistent notification which is not swipable so only by stopping the service notification disappear.
 
-INCLUDE THIS IN MANIFEST :-
- <service
+include this in manifest:-
+<service
             android:name=".NotiService"
             android:enabled="true"
             android:exported="true">
