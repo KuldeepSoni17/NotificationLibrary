@@ -6,9 +6,7 @@ Disadvantage of this Library :- It generates a persistent notification which is 
 
 include this in manifest:- 
 <service 
-
-<service
-            android:name=".NotiService"
-            android:enabled="true"
-            android:exported="true">
+android:name=".NotiService"
+android:enabled="true"
+android:exported="true">
 </service>
